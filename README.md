@@ -1,25 +1,26 @@
 # Import Exec Demo
 
-This repository contains a **proof-of-concept (PoC)** Python package that demonstrates how importing a module can be abused to trigger code execution.
+This repository contains a **proof-of-concept (PoC)** Python package that demonstrates how importing a module can be abused to trigger code execution.  
 
 ⚠️ **Disclaimer**:  
 This project is for **educational and security research purposes only**.  
 It does **not** contain harmful code.  
-Do not use the techniques shown here for malicious purposes.
+Do not use the techniques shown here for malicious purposes.  
 
 ---
 
-##  Background
+## 🔍 Background
 
-- In older versions of Python packaging, there were `preinstall` and `postinstall` hooks that could be used to run code during installation.
-- These were removed in newer versions for **security reasons**, since attackers abused them for supply chain attacks.
-- While those hooks are gone, import-time execution is still possible using normal Python mechanisms (e.g., `__init__.py` or function wrappers).
+- In older versions of Python packaging, there were `preinstall` and `postinstall` hooks that could run code during installation.  
+- These were removed in newer versions for **security reasons**, since attackers abused them.  
+- Import-time execution, however, is just how Python works — any code in `__init__.py` or top-level module scope will run on import.  
 
-This project demonstrates the *concept* safely so developers understand the risk.
+👉 **Important:** This is *not a vulnerability in Python itself*.  
+It’s normal behavior that can be abused if a developer installs an untrusted package.  
 
 ---
 
-##  Example (Safe Demonstration)
+## 📖 Example (Safe Demonstration)
 
 ```python
 import colorlib21
@@ -27,31 +28,41 @@ import colorlib21
 print(colorlib21.red("Hello, World!"))
 ```
 
-Below is an example screenshot of how it appears in use:
+In this safe demo, the `red()` function only prints colored text.  
+In a malicious package, import-time code or wrapper functions could hide unexpected behavior.  
+
+### Screenshot
 
 ![Example usage demonstrating color output](example.png)
 
-In this demo, the `red()` function only prints colored text. In a real malicious scenario, importing the module or calling its functions could also trigger hidden actions.
+---
+
+## 🛡️ Why this matters
+
+- Software supply chain attacks often target ecosystems like PyPI, npm, and RubyGems.  
+- Attackers rely on **typosquatting** (uploading packages with similar names) or **import-time execution** to compromise developers.  
+- Understanding this risk helps developers secure their pipelines and avoid compromise.  
 
 ---
 
-##  Why this matters
+## 📚 Documented Real-World Cases
 
-- Software supply chain attacks are increasingly common.
-- Attackers may abuse package names (typosquatting) or import-time behavior to trick developers.
-- Developers should carefully vet dependencies before installing from PyPI.
+This method has been seen in real attacks against PyPI users:
+
+- **2017** — Dozens of malicious packages uploaded to PyPI with typosquatted names (e.g. `urllibs` vs `urllib3`), containing code that executed on import.  
+  *[Source: BleepingComputer](https://www.bleepingcomputer.com/news/security/ten-malicious-libraries-found-on-pypi-python-package-index/)*  
+
+- **2018** — Another wave of malicious PyPI packages, including import-time credential stealers in `__init__.py`.  
+  *[Source: ZDNet](https://www.zdnet.com/article/malicious-python-libraries-caught-stealing-ssh-and-gpg-keys/)*  
+
+- **2020** — Dependency confusion attacks where published PyPI packages exfiltrated environment variables at import.  
+  *[Source: Medium – Alex Birsan](https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610)*  
+
+These cases highlight that the danger is not a flaw in Python itself, but in how untrusted packages can exploit normal mechanics.  
 
 ---
 
-##  References
-
-- [PyPI Security Documentation](https://pypi.org/security/)  
-- [OWASP Dependency Confusion Guide](https://owasp.org/www-community/attacks/Dependency_Confusion)  
-- [Supply-Chain Attack Examples](https://snyk.io/blog/malicious-packages/)  
-
----
-
-##  Responsible Use
+## ⚠️ Responsible Use
 
 This repository is a **PoC only**. It should not be used to create or distribute actual malware.  
-If you discover vulnerabilities in Python packaging or PyPI, report them responsibly to the [PyPI Security Team](https://pypi.org/security/).
+If you discover vulnerabilities in Python packaging or PyPI, report them responsibly to the [PyPI Security Team](https://pypi.org/security/).  
